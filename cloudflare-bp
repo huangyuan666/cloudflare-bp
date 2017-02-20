@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+import sys
+
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
+from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
+
+from cvm.controller import Browser
+
+parser = ArgumentParser(
+    description='Cloudflare CDN DDoS Bypass',
+    formatter_class=ArgumentDefaultsHelpFormatter,
+)
+
+parser.add_argument(
+    '-o', '--output', action='store',
+    help='Output Path',
+    default='cookies.txt'
+)
+
+parser.add_argument(
+    'url', action='store',
+    help='Website Url',
+)
+
+if len(sys.argv) < 2:
+    parser.print_help()
+    exit(0)
+
+args = parser.parse_args()
+
+dc = dict(DesiredCapabilities.PHANTOMJS)
+dc['phantomjs.page.settings.userAgent'] = 'Mozilla/5.0 (X11; Linux x86_64; rv:51.0) Gecko/20100101 Firefox/51.0'
+driver = webdriver.PhantomJS(
+    'phantomjs', desired_capabilities=dc
+)
+
+browser = Browser(driver)
+browser.url = args.url
+browser.cookies.jar().save(
+    args.output,
+    ignore_discard=True,
+    ignore_expires=True
+)
+
